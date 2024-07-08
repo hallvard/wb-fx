@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>wb-markdown</artifactId>
+    <version>DEV-SNAPSHOT</version>
+
+    <parent>
+        <groupId>no.hal.wb-fx</groupId>
+        <artifactId>wb-fx-parent</artifactId>
+        <version>DEV-SNAPSHOT</version>        
+    </parent>
+
+    <repositories>
+        <!-- one.jpro.platform >> jpro-mdfx -->
+        <repository>
+            <id>sandec</id>
+            <url>https://sandec.jfrog.io/artifactory/repo/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>no.hal.wb-fx</groupId>
+            <artifactId>wb-fx</artifactId>
+            <version>DEV-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <!-- markdown pane -->
+        <dependency>
+            <groupId>one.jpro.platform</groupId>
+            <artifactId>jpro-mdfx</artifactId>
+            <version>0.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.fx</groupId>
+            <artifactId>quarkus-fx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-jackson</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>package quarkus:dev</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>io.smallrye</groupId>
+                <artifactId>jandex-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

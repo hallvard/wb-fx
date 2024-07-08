@@ -1,0 +1,12 @@
+@startuml view-dependencies
+
+component CsvView
+component BarChartView
+component StackedBarChartView
+
+CsvView <.. BarChartView : Table
+CsvView <.. StackedBarChartView : Table
+
+component ExpressionView
+
+@enduml

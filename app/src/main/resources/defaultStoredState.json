@@ -1,0 +1,9 @@
+[
+    {
+        "type" : "view",
+        "id" : "no.hal.wb.app.WelcomeView#0",
+        "storedstate" : {
+          "markdownResource" : "no.hal.wb.app.WelcomeView:/markdown/views/no.hal.wb.app.WelcomeView.md"
+        }
+    }
+]
