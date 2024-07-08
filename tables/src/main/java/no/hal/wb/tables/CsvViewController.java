@@ -13,10 +13,13 @@ import java.util.function.Supplier;
 
 import org.jboss.logging.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -29,11 +32,12 @@ import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingsSource;
 import no.hal.fx.util.ActionProgressHelper;
+import no.hal.wb.storedstate.Configurable;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.io.csv.CsvReadOptions;
 
 @Dependent
-public class CsvViewController extends AbstractTableViewController implements BindingsSource {
+public class CsvViewController extends AbstractTableViewController implements BindingsSource, Configurable {
 
     @FXML
     TextField uriText;
@@ -79,9 +83,6 @@ public class CsvViewController extends AbstractTableViewController implements Bi
     private boolean isFileUri(String uri) {
         return uri.startsWith("file:") || (! uri.contains(":"));
     }
-    private boolean isFileUri(URI uri) {
-        return "file".equals(uri.getScheme());
-    }
     private String getFilePath(String uri) {
         if (uri.startsWith("file:")) {
             return URI.create(uri).getPath();
@@ -120,7 +121,11 @@ public class CsvViewController extends AbstractTableViewController implements Bi
 
     @FXML
     void loadCsv(ActionEvent event) {
-        var uri = getUri(uriText.getText());
+        var uriString = uriText.getText();
+        if (uriString == null || uriString.isBlank()) {
+            return;
+        }
+        var uri = getUri(uriString);
         buttonActionProgressHelper.performAction(
             event, () -> {
                 Supplier<InputStream> input = () -> {
@@ -131,14 +136,16 @@ public class CsvViewController extends AbstractTableViewController implements Bi
                         throw new RuntimeException(e);
                     }
                 };
-                return tableFromCsv(Path.of(uri).getFileName().toString(), input);
+                logger.infof("Reading csv from %s", uri);
+                return tableFromCsv(Path.of(uri.getPath()).getFileName().toString(), input);
             },
             this::setTable,
             exception -> {
+                logger.warnf("Exception when loading csv from %s: %s", uri, exception.getMessage());
                 if (alert == null) {
                     alert = new Alert(Alert.AlertType.ERROR);
                 }
-                alert.setTitle("Exception when loading Csv file");
+                alert.setTitle("Exception when loading csv");
                 alert.setHeaderText(exception.getClass().getSimpleName());
                 alert.setContentText(exception.getMessage());
                 alert.showAndWait();        
@@ -167,17 +174,18 @@ public class CsvViewController extends AbstractTableViewController implements Bi
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
                 lines.add(line);
+                if (lines.size() >= lineCount) {
+                    break;
+                }
             }
         }
         final int[][] counts = new int[candidates.length()][lines.size()];
         for (int lineNum = 0; lineNum < lines.size(); lineNum++) {
             final String s = lines.get(lineNum);
-            if (s != null) {
-                for (int i = 0; i < s.length(); i++) {
-                    final int pos = candidates.indexOf(s.charAt(i));
-                    if (pos >= 0) {
-                        counts[pos][lineNum]++;
-                    }
+            for (int i = 0; i < s.length(); i++) {
+                final int pos = candidates.indexOf(s.charAt(i));
+                if (pos >= 0) {
+                    counts[pos][lineNum]++;
                 }
             }
         }
@@ -195,5 +203,24 @@ public class CsvViewController extends AbstractTableViewController implements Bi
             best = cand;
         }
         return candidates.charAt(best);
+    }
+
+    // Configurable
+
+    @Override
+    public JsonNode getConfiguration() {
+        var configuration = Configurable.getJsonNodeFactory().objectNode();
+        configuration.put("uri", uriText.getText());
+        return configuration;
+    }
+
+    @Override
+    public void configure(JsonNode configuration) {
+        System.out.println("Configuring with " + configuration);
+        if (configuration != null) {
+            var uri = configuration.get("uri").asText();
+            uriText.setText(uri);
+            Platform.runLater(loadCsvAction::fire);
+        }
     }
 }

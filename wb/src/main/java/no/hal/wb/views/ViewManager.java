@@ -162,9 +162,19 @@ public class ViewManager implements Configurable {
         Platform.runLater(() -> {
             detachableTabPane.getTabs().add(tab);
             detachableTabPane.getSelectionModel().selectLast();
+            configureView(viewInfo);
             fireViewEvent(new ViewEvent.Added(viewInfo));
         });
         return viewInfo;
+    }
+
+    private void configureView(ViewInfo viewInfo) {
+        if (viewInfo.instance().controller() instanceof Configurable configurable) {
+            var json = stateStorageManager.getStoredStateForId(viewInfo.viewId());
+            if (json != null) {
+                configurable.configure(json);
+            }
+        }
     }
 
     ViewInfo addView(String id, JsonNode configuration) {

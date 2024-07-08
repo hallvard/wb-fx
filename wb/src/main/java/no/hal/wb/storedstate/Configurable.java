@@ -1,6 +1,7 @@
 package no.hal.wb.storedstate;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 public interface Configurable {
 
@@ -18,5 +19,9 @@ public interface Configurable {
      */
     default JsonNode getConfiguration() {
         return null;
+    }
+
+    public static JsonNodeFactory getJsonNodeFactory() {
+        return JsonNodeFactory.instance;
     }
 }

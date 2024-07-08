@@ -16,7 +16,6 @@ import java.util.function.Function;
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 
@@ -219,10 +218,10 @@ public class MarkdownViewController implements Configurable {
         navigate(-1);
     }
 
-    // configuration
+    // Configurable
 
     public final static JsonNode configuration(String markdownResource) {
-        var configuration = JsonNodeFactory.instance.objectNode();
+        var configuration = Configurable.getJsonNodeFactory().objectNode();
         configuration.put("markdownResource", markdownResource);
         return configuration;
     }
