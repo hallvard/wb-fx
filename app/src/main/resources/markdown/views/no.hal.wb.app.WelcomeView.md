@@ -8,4 +8,4 @@ Views may be *linked* so one may provide data to another. When a view is opened,
 
 Most views have an info page, right-click on the tab and select the **Info** menu item to check it out.
 
-The info pages (like this one) have some limitation that should be noted. Links to http(s) pages are shown in a JavaFX WebView and may not be fully functional. 
+The workbench is a [JavaFX](https://openjfx.io/) application built on [Quarkus](https://quarkus.io/) with [quarkus-fx](https://github.com/quarkiverse/quarkus-fx).
