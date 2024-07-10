@@ -1,11 +1,19 @@
 @startuml view-dependencies
 
 component CsvView
+component SummaryView
 component BarChartView
 component StackedBarChartView
+component LineChartView
 
 CsvView <.. BarChartView : Table
 CsvView <.. StackedBarChartView : Table
+CsvView <.. LineChartView : Table
+CsvView <.. SummaryView : Table
+
+SummaryView <.. BarChartView : Table
+SummaryView <.. StackedBarChartView : Table
+SummaryView <.. LineChartView : Table
 
 component ExpressionView
 

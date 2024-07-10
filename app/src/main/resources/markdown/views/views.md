@@ -12,6 +12,8 @@ Here are all the available views:
 
 * [Stacked bar chart view](no.hal.wb.app.StackedBarChartView.md) - view table data as stacked bar chart
 
+* [Line chart view](no.hal.wb.app.LineChartView.md) - view table data as line chart
+
 * [Expression view](no.hal.wb.app.ExpressionView.md) - evaluate expressions
 
 ### Dependencies
