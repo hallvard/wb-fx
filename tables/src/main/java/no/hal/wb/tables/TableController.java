@@ -56,19 +56,21 @@ public class TableController {
 
     public void setTable(Table table) {
         this.tableViewModel = new TableDataProvider(table);
-        if (tableView instanceof TableView2<?>) {
-            columnFilters = new ArrayList<>();
-        }
+        columnFilters = (tableView instanceof TableView2<?> ? new ArrayList<>() : null);
         var viewColumns = new ArrayList<TableColumn<Integer, Object>>();
-        var rowNumColumn = new TableColumn<Integer, Object>("#");
-        rowNumColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Object>(cellData.getValue() + 1));
-        viewColumns.add(rowNumColumn);
-        for (int i = 0; i < table.columnCount(); i++) {
+        if (table != null) {
+            var rowNumColumn = new TableColumn<Integer, Object>("#");
+            rowNumColumn.setCellValueFactory(cellData -> new SimpleObjectProperty<Object>(cellData.getValue() + 1));
+            viewColumns.add(rowNumColumn);
+        }
+        int columnCount = (table != null ? table.columnCount() : 0);
+        for (int i = 0; i < columnCount; i++) {
             var column = table.column(i);
             viewColumns.add(createTableColumn(column, i));
         }
         tableView.getColumns().setAll(viewColumns);
-        tableView.getItems().setAll(IntStream.range(0, table.rowCount()).mapToObj(Integer::valueOf).toList());
+        int rowCount = (table != null ? table.rowCount() : 0);
+        tableView.getItems().setAll(IntStream.range(0, rowCount).mapToObj(Integer::valueOf).toList());
         tableProperty.setValue(new TableUpdate(table));
     }
 
@@ -139,7 +141,6 @@ public class TableController {
                     toolTip.setText(toolTipString);
                     if (! preparedExpr.getDiagnostics().isEmpty()) {
                         var pos = textControl.localToScreen(5 , 5);
-                        System.out.println("Showing " + toolTip.getText() + " at " + pos);
                         textControl.getTooltip().show(textControl.getScene().getWindow(), pos.getX(), pos.getY());
                     }
                 }

@@ -25,6 +25,11 @@ public class ViewProviders {
     }
 
     @Produces
+    ViewProvider summaryView() throws IOException {
+        return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.SummaryView", "Summary", "Data"), fxmlLoaderProvider, "/no/hal/wb/fx/SummaryView.fxml"){};
+    }
+
+    @Produces
     ViewProvider expressionView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.ExpressionView", "Expression", "Scripting"), fxmlLoaderProvider, "/no/hal/wb/fx/ExpressionSupportView.fxml"){};
     }
@@ -37,6 +42,11 @@ public class ViewProviders {
     @Produces
     ViewProvider stackedChartView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.StackedBarChartView", "Stacked bar chart", "Charts"), fxmlLoaderProvider, "/no/hal/wb/fx/StackedBarChartView.fxml"){};
+    }
+
+    @Produces
+    ViewProvider lineChartView() throws IOException {
+        return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.LineChartView", "Line chart", "Charts"), fxmlLoaderProvider, "/no/hal/wb/fx/LineChartView.fxml"){};
     }
 
     @Inject

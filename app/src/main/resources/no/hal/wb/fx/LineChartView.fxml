@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ComboBox?>
 <?import org.controlsfx.control.CheckComboBox?>
-<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.LineChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.VBox?>
@@ -22,12 +22,12 @@
         <Label text="Number column(s): "/>
         <CheckComboBox fx:id="numberColumnsSelector"/>
     </HBox>
-    <BarChart fx:id="xyChart" VBox.vgrow="ALWAYS" animated="false">
+    <LineChart fx:id="xyChart" VBox.vgrow="ALWAYS" animated="false">
         <xAxis>
-            <NumberAxis fx:id="numberAxis"/>
+            <CategoryAxis fx:id="mainAxis"/>
         </xAxis>
         <yAxis>
-            <CategoryAxis fx:id="mainAxis"/>
+            <NumberAxis fx:id="numberAxis"/>
         </yAxis>
-    </BarChart>
+    </LineChart>
 </VBox>

@@ -173,7 +173,8 @@ public class CsvViewController extends AbstractTableViewController implements Bi
         try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(input))) {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
-                lines.add(line);
+                var cleaned = line.replaceAll("\"[^\"]*\"", "\"\"");
+                lines.add(cleaned);
                 if (lines.size() >= lineCount) {
                     break;
                 }
@@ -216,7 +217,6 @@ public class CsvViewController extends AbstractTableViewController implements Bi
 
     @Override
     public void configure(JsonNode configuration) {
-        System.out.println("Configuring with " + configuration);
         if (configuration != null) {
             var uri = configuration.get("uri").asText();
             uriText.setText(uri);

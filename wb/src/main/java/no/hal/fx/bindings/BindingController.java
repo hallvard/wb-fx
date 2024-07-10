@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javafx.beans.binding.Bindings;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -33,29 +34,25 @@ public class BindingController {
         this.bindingControllerRoot = bindingControllerRoot;
     }
 
-    private List<BindingSource<?>> bindingSources = new ArrayList<>();
-    private List<BindingTarget<?>> bindingTargets = new ArrayList<>();
+    private List<BindingsSource> bindingsSources = new ArrayList<>();
+    private List<BindingsTarget> bindingsTargets = new ArrayList<>();
     
     public void addBindingSources(BindingsSource bindingsSource) {
-        var sources = bindingsSource.getBindingSources();
-        this.bindingSources.addAll(sources);
-        sources.forEach(this::updateBindingSourceTooltip);
+        bindingsSources.add(bindingsSource);
+        bindingsSource.getBindingSources().forEach(this::updateBindingSourceTooltip);
     }
     public void removeBindingSources(BindingsSource bindingsSource) {
-        var sources = bindingsSource.getBindingSources();
-        this.bindingSources.removeAll(sources);
-        sources.forEach(this::updateBindingSourceTooltip);
+        bindingsSources.remove(bindingsSource);
+        bindingsSource.getBindingSources().forEach(this::updateBindingSourceTooltip);
     }
     
     public void addBindingTargets(BindingsTarget bindingsTarget) {
-        var targets = bindingsTarget.getBindingTargets();
-        this.bindingTargets.addAll(targets);
-        targets.forEach(this::updateBindingTargetTooltip);
+        bindingsTargets.add(bindingsTarget);
+        bindingsTarget.getBindingTargets().forEach(this::updateBindingTargetTooltip);
     }
     public void removeBindingTargets(BindingsTarget bindingsTarget) {
-        var targets = bindingsTarget.getBindingTargets();
-        this.bindingTargets.removeAll(targets);
-        targets.forEach(this::updateBindingTargetTooltip);
+        bindingsTargets.remove(bindingsTarget);
+        bindingsTarget.getBindingTargets().forEach(this::updateBindingTargetTooltip);
     }
 
     private Map<BindingSubscription, Path> bindingSubscriptions = new HashMap<>();
@@ -66,40 +63,43 @@ public class BindingController {
     private Stream<BindingSubscription> getBindingSubscriptions(BindingSource<?> source, BindingTarget<?> target) {
         return getBindingSubscriptions(subscription -> (source == null || source == subscription.source()) && (target == null || target == subscription.target()));
     }
+    private Stream<BindingSubscription> getBindingSubscriptions(BindingSource<?> source) {
+        return getBindingSubscriptions(source, null);
+    }
+    private Stream<BindingSubscription> getBindingSubscriptions(BindingTarget<?> target) {
+        return getBindingSubscriptions(null, target);
+    }
 
     private boolean bindingSourceMatchesTarget(BindingSource<?> source, BindingTarget<?> target) {
         return source.sourceClass().equals(target.targetClass());
     }
 
-    public Optional<BindingSource<?>> findSourceForTarget(BindingTarget<?> bindingTarget) {
-        return bindingSources
-            // reverse, so newly added sources are tried first
-            .reversed().stream()
-            .filter(bindingSource -> bindingSourceMatchesTarget(bindingSource, bindingTarget)).findFirst();
-    }
-    public Optional<BindingTarget<?>> findTargetForSource(BindingSource<?> bindingSource) {
-        return bindingTargets
-            // reverse, so newly added targets are tried first
-            .reversed().stream()
-            .filter(bindingTarget -> bindingSourceMatchesTarget(bindingSource, bindingTarget)).findFirst();
-    }
-
-    public boolean bindToTarget(BindingTarget<?> bindingTarget) {
-        var source = findSourceForTarget(bindingTarget);
-        source.ifPresent(bindingSource -> bindSourceToTarget(bindingSource, bindingTarget, null));
-        return source.isPresent();
-    }
-    public boolean bindToSource(BindingSource<?> bindingSource) {
-        var target = findTargetForSource(bindingSource);
-        target.ifPresent(bindingTarget -> bindSourceToTarget(bindingSource, bindingTarget, null));
-        return target.isPresent();
-    }
-
     public void bindToTargets(BindingsTarget bindingsTarget) {
-        bindingsTarget.getBindingTargets().forEach(this::bindToTarget);
+        for (var bindingTarget : bindingsTarget.getBindingTargets()) {
+            for (var bindingsSource : bindingsSources.reversed()) {
+                if (bindingsSource != bindingsTarget) {
+                    for (var bindingSource : bindingsSource.getBindingSources()) {
+                        if (bindingSourceMatchesTarget(bindingSource, bindingTarget) && bindingTarget.acceptsBindings(getBindingSubscriptions(bindingTarget).count() + 1)) {
+                            bindSourceToTarget(bindingSource, bindingTarget, null);
+                        }
+                    }
+                }
+            }
+        }
     }
+
     public void bindToSources(BindingsSource bindingsSource) {
-        bindingsSource.getBindingSources().forEach(this::bindToSource);
+        for (var bindingSource : bindingsSource.getBindingSources()) {
+            for (var bindingsTarget : bindingsTargets.reversed()) {
+                if (bindingsTarget != bindingsSource) {
+                    for (var bindingTarget : bindingsTarget.getBindingTargets()) {
+                        if (bindingSourceMatchesTarget(bindingSource, bindingTarget) && bindingTarget.acceptsBindings(getBindingSubscriptions(bindingTarget).count() + 1)) {
+                            bindSourceToTarget(bindingSource, bindingTarget, null);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public boolean bindingSourceSupportsTarget(BindingSource<?> bindingSource, BindingTarget<?> bindingTarget) {
@@ -132,8 +132,12 @@ public class BindingController {
     private void updateBindingsTooltip(Node node) {
         if (node instanceof Control control) {
             StringBuilder tooltip = new StringBuilder();
-            bindingSources.stream().filter(bs -> bs.sourceNode() == node).forEach(bs -> appendTooltip(tooltip, SOURCE_TOOLTIP_FORMAT, bs.sourceClass().getSimpleName(), getBindingSubscriptions(bs, null).count()));
-            bindingTargets.stream().filter(bt -> bt.targetNode() == node).forEach(bt -> appendTooltip(tooltip, TARGET_TOOLTIP_FORMAT, bt.targetClass().getSimpleName(), getBindingSubscriptions(null, bt).count()));
+            bindingsSources.stream()
+                .flatMap(bindingsSource -> bindingsSource.getBindingSources().stream())
+                .filter(bs -> bs.sourceNode() == node).forEach(bs -> appendTooltip(tooltip, SOURCE_TOOLTIP_FORMAT, bs.sourceClass().getSimpleName(), getBindingSubscriptions(bs, null).count()));
+            bindingsTargets.stream()
+                .flatMap(bindingsTarget -> bindingsTarget.getBindingTargets().stream())
+                .filter(bt -> bt.targetNode() == node).forEach(bt -> appendTooltip(tooltip, TARGET_TOOLTIP_FORMAT, bt.targetClass().getSimpleName(), getBindingSubscriptions(null, bt).count()));
             if (tooltip.length() > 0) {
                 control.setTooltip(new Tooltip(tooltip.toString()));
             }
@@ -270,7 +274,9 @@ public class BindingController {
         @Override
         public void handle(KeyEvent event) {
             if (event.getEventType() == KeyEvent.KEY_PRESSED && bindingGestureModifiers.match(event)) {
-                bindingSources.forEach(bindingSource -> sourceHighlighter.highlight(bindingSource.sourceNode()));
+                for (var bindingsSource : bindingsSources) {
+                    bindingsSource.getBindingSources().forEach(bindingSource -> sourceHighlighter.highlight(bindingSource.sourceNode()));
+                }
                 for (var bs : bindingSubscriptions.keySet()) {
                     var path = bindingSubscriptions.computeIfAbsent(bs, bs2 -> createBindingPath());
                     if (path.getParent() == null) {
@@ -318,11 +324,11 @@ public class BindingController {
             if (event.getEventType() == MouseEvent.MOUSE_PRESSED && pick.getIntersectedNode() instanceof Path path && isBindingPath(path)) {
                 pathMaybe = Optional.of(path);
             } else if (event.getEventType() == MouseEvent.MOUSE_MOVED || event.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                sourceMaybe = bindingSources.stream()
+                sourceMaybe = bindingsSources.stream().flatMap(bindingsSource -> bindingsSource.getBindingSources().stream())
                     .filter(bindingSource -> isChildOf(pick.getIntersectedNode(), bindingSource.sourceNode()))
                     .findAny();
             } else if (this.bindingSource != null && (event.getEventType() == MouseEvent.MOUSE_DRAGGED || event.getEventType() == MouseEvent.MOUSE_RELEASED)) {
-                targetMaybe = bindingTargets.stream()
+                targetMaybe = bindingsTargets.stream().flatMap(bindingsTarget -> bindingsTarget.getBindingTargets().stream())
                     .filter(bindingTarget -> isChildOf(pick.getIntersectedNode(), bindingTarget.targetNode()))
                     .filter(bindingTarget -> bindingSource != null && bindingSourceSupportsTarget(bindingSource, bindingTarget))
                     .findFirst();
@@ -356,7 +362,9 @@ public class BindingController {
                     Point3D pickPoint = pick.getIntersectedPoint();
                     updateBindingPathEnd(bindingPath, new Point2D(pickPoint.getX(), pickPoint.getY()), pick.getIntersectedNode());
                 }
-                bindingTargets.forEach(bindingTarget -> targetHighlighter.highlight(bindingTarget.targetNode()));
+                for (var bindingsTarget : bindingsTargets) {
+                    bindingsTarget.getBindingTargets().forEach(bindingTarget -> targetHighlighter.highlight(bindingTarget.targetNode()));
+                }
             } else if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
                 if (this.bindingSource != null && targetMaybe.isPresent()) {
                     bindingPath.setMouseTransparent(false);

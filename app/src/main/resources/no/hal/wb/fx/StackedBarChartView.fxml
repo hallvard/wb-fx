@@ -1,26 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ComboBox?>
+<?import org.controlsfx.control.CheckComboBox?>
 <?import javafx.scene.chart.StackedBarChart?>
 <?import javafx.scene.chart.CategoryAxis?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.hal.wb.tables.CategorySummaryXYChartViewController">
-    <HBox>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.hal.wb.tables.XYChartViewController">
+    <HBox alignment="CENTER_LEFT" spacing="2">
+        <padding>
+            <Insets top="5" bottom="10" left="5" right="5"/>
+        </padding>
         <Label text="Main axis column: "/>
         <ComboBox fx:id="mainAxisColumnSelector" onAction="#updateChart"/>
-        <Label text="Category column: "/>
-        <ComboBox fx:id="categoryColumnSelector" onAction="#updateChart"/>
+        <Pane minWidth="10"/>
     </HBox>
     <StackedBarChart fx:id="xyChart" VBox.vgrow="ALWAYS" animated="false">
         <xAxis>
             <NumberAxis fx:id="numberAxis"/>
         </xAxis>
         <yAxis>
-            <CategoryAxis fx:id="categoryAxis"/>
+            <CategoryAxis fx:id="mainAxis"/>
         </yAxis>
     </StackedBarChart>
 </VBox>

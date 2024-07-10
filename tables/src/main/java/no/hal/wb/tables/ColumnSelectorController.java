@@ -1,43 +1,48 @@
 package no.hal.wb.tables;
 
+import java.util.ArrayList;
+
 import javafx.scene.control.ComboBox;
-import tech.tablesaw.api.ColumnType;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.columns.Column;
 
 public class ColumnSelectorController {
 
     private final ComboBox<String> columnSelector;
-    Class<? extends Column> columnClass;
+    private final ColumnFilter columnFilter;
+    boolean mandatory;
     
-    ColumnType columnType;
-    
-    public ColumnSelectorController(ComboBox<String> columnSelector, Class<? extends Column> columnClass, ColumnType columnType) {
+    public ColumnSelectorController(ComboBox<String> columnSelector, ColumnFilter columnFilter, boolean mandatory) {
         this.columnSelector = columnSelector;
-        this.columnClass = columnClass;
-        this.columnType = columnType;
+        this.columnFilter = columnFilter;
+        this.mandatory = mandatory;
     }
-
-    public ColumnSelectorController(ComboBox<String> columnSelector, Class<? extends Column> columnClass, ColumnType columnType, Table table) {
-        this(columnSelector, columnClass, columnType);
-        setTable(table);
+    public ColumnSelectorController(ComboBox<String> columnSelector, ColumnFilter columnFilter) {
+        this(columnSelector, columnFilter, true);
     }
 
     public void setTable(Table table) {
-        if (table.columnNames().equals(columnSelector.getItems())) {
-            return;
-        }
-        String columnName = columnSelector.getValue();
-        var columnNames = table.columns().stream()
-            .filter(col -> columnClass == null || columnClass.isInstance(col))
-            .filter(col -> columnType == null || col.type() == columnType)
+        if (table == null) {
+            columnSelector.getItems().clear();
+        } else {
+            var columnNames = table.columns().stream()
+            .filter(columnFilter)
             .map(Column::name)
             .toList();
-        columnSelector.getItems().setAll(columnNames);
-        // try to preserve the selected column
-        int pos = columnSelector.getItems().indexOf(columnName);
-        if (pos >= 0 && pos != columnSelector.getSelectionModel().getSelectedIndex()) {
-            columnSelector.setValue(columnName);
+            if (! mandatory) {
+                columnNames = new ArrayList<>(columnNames);
+                columnNames.add(0, "");
+            }
+            var selectorItems = columnSelector.getItems();
+            if (columnNames.equals(selectorItems)) {
+                return;
+            }
+            String selectedColumnName = columnSelector.getValue();
+            selectorItems.setAll(columnNames);
+            // try to preserve the selected column
+            if (columnNames.contains(selectedColumnName) && (! selectedColumnName.equals(columnSelector.getSelectionModel().getSelectedItem()))) {
+                columnSelector.setValue(selectedColumnName);
+            }                
         }
     }
 }

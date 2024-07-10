@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import org.controlsfx.control.CheckComboBox?>
+<?import javafx.scene.control.Label?>
+<?import org.controlsfx.control.tableview2.TableView2?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.hal.wb.tables.SummaryViewController">
+    <HBox alignment="CENTER_LEFT" spacing="2">
+        <padding>
+            <Insets top="5" bottom="0" left="5" right="5"/>
+        </padding>
+        <Label text="Summarize column(s): "/>
+        <CheckComboBox fx:id="summaryColumnsSelector"/>
+        <Pane minWidth="10"/>
+        <Label text="Aggregate with: "/>
+        <ComboBox fx:id="aggregateFunctionSelector" onAction="#updateSummary"/>
+    </HBox>
+    <HBox alignment="CENTER_LEFT">
+        <padding>
+            <Insets top="5" bottom="10" left="5" right="5"/>
+        </padding>
+        <Label text="Group by: "/>
+        <CheckComboBox fx:id="byColumnsSelector"/>
+    </HBox>
+    <TableView2 fx:id="tableView" VBox.vgrow="ALWAYS"/>
+</VBox>
