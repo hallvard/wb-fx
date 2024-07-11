@@ -90,7 +90,7 @@ public class XYChartViewController implements BindingsTarget {
         }
         Row row = table.row(0);
         while (row.hasNext()) {
-            var mainAxisValue = row.getString(mainAxisColumn);
+            var mainAxisValue = String.valueOf(row.getObject(mainAxisColumn));
             for (var numberColumn : numberColumns) {
                 var value = row.getNumber(numberColumn);
                 var data = (xyChart.getXAxis() == mainAxis ? new XYChart.Data(mainAxisValue, value) : new XYChart.Data(value, mainAxisValue));

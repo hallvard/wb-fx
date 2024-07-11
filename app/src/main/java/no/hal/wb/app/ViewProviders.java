@@ -25,8 +25,8 @@ public class ViewProviders {
     }
 
     @Produces
-    ViewProvider summaryView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.SummaryView", "Summary", "Data"), fxmlLoaderProvider, "/no/hal/wb/fx/SummaryView.fxml"){};
+    ViewProvider tableSummaryView() throws IOException {
+        return new FxmlViewProvider(new ViewProvider.Info("no.hal.wb.app.TableSummaryView", "Table summary", "Data"), fxmlLoaderProvider, "/no/hal/wb/fx/TableSummaryView.fxml"){};
     }
 
     @Produces

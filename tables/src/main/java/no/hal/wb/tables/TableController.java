@@ -9,6 +9,7 @@ import org.controlsfx.control.tableview2.TableView2;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.transformation.SortedList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -24,8 +25,13 @@ public class TableController {
 
     private final TableView<Integer> tableView;
     
+    private final SortedList<Integer> viewIndices;
+
     public TableController(TableView<Integer> tableView) {
         this.tableView = tableView;
+        viewIndices = new SortedList<>(tableView.getItems());
+        viewIndices.comparatorProperty().bind(tableView.comparatorProperty());
+        viewIndices.subscribe(() -> updateTableProperty(computeViewTable(filterSelection)));
     }
 
     public TableController(TableView<Integer> tableView, Table table) {
@@ -94,7 +100,7 @@ public class TableController {
     private Selection filterSelection;
     private ExpressionSupportHelper expressionSupportHelper;
 
-    private void applyFilters() {
+    private void updateFilterSelection() {
         filterSelection = null;
         if (expressionSupport != null && expressionSupportHelper == null) {
             expressionSupportHelper = new ExpressionSupportHelper(tableViewModel, expressionSupport) {
@@ -146,12 +152,42 @@ public class TableController {
                 }
             }
         }
+    }
+
+    private void updateTableView() {
         var itemIndices = (filterSelection != null ? filterSelection.toArray() : IntStream.range(0, tableViewModel.getRowCount()).toArray());
         tableView.getItems().setAll(IntStream.of(itemIndices).mapToObj(Integer::valueOf).toList());
+    }
+
+    private Table computeViewTable(Selection selection) {
         var viewTable = tableViewModel.getTable();
-        if (filterSelection != null) {
-            viewTable = viewTable.where(filterSelection);
+        if (selection != null) {
+            viewTable = viewTable.where(selection);
         }
-        tableProperty.setValue(new TableUpdate(viewTable));
+        if (! tableView.getSortOrder().isEmpty()) {
+            List<Integer> reverseIndices = new ArrayList<>(viewIndices.size());
+            for (int origRow = 0; origRow < viewIndices.size(); origRow++) {
+                int row = viewIndices.get(origRow);
+                while (reverseIndices.size() <= row) {
+                    reverseIndices.add(0);
+                }
+                reverseIndices.set(row, origRow);
+            }
+            viewTable = viewTable.sortOn((row1, row2) -> {
+                int rowNum1 = row1.getRowNumber(), rowNum2 = row2.getRowNumber();
+                return Integer.compare(reverseIndices.get(rowNum1), reverseIndices.get(rowNum2));
+            });
+        }
+        return viewTable;
+    }
+
+    private void applyFilters() {
+        updateFilterSelection();
+        updateTableView();
+        updateTableProperty(computeViewTable(filterSelection));
+    }
+
+    private void updateTableProperty(Table viewTable) {
+        tableProperty.setValue(new TableUpdate(computeViewTable(filterSelection)));
     }
 }

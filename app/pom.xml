@@ -13,12 +13,31 @@
         <version>DEV-SNAPSHOT</version>        
     </parent>
 
+    <properties>
+        <jpro.version>2024.2.1</jpro.version>
+    </properties>
+
     <repositories>
         <repository>
             <id>ow2</id>
             <url>https://repository.ow2.org/nexus/content/repositories/public/</url>
         </repository>
+        <!-- jprop doesn't work with quarkus-fx
+        <repository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </repository>
+        -->
     </repositories>
+
+    <!-- jprop doesn't work with quarkus-fx
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jpro - sandec repository</id>
+            <url>https://sandec.jfrog.io/artifactory/repo</url>
+        </pluginRepository>
+    </pluginRepositories>
+    -->
 
     <dependencies>
         <dependency>
@@ -64,6 +83,15 @@
             <artifactId>quarkus-fx</artifactId>
             <version>0.4.2</version>
         </dependency>
+
+        <!-- jprop doesn't work with quarkus-fx
+        <dependency>
+            <groupId>com.sandec.jpro</groupId>
+            <artifactId>jpro-webapi</artifactId>
+            <version>${jpro.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        -->
     </dependencies>
 
     <build>
@@ -83,6 +111,17 @@
                 <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
             </plugin>
+
+            <!-- jprop doesn't work with quarkus-fx
+            <plugin>
+                <groupId>one.jpro</groupId>
+                <artifactId>jpro-maven-plugin</artifactId>
+                <version>${jpro.version}</version>
+                <configuration>
+                    <mainClassName>no.hal.wb.app.WbApplication</mainClassName>
+                </configuration>
+            </plugin>
+            -->
 
             <plugin>
                 <groupId>com.github.jeluard</groupId>

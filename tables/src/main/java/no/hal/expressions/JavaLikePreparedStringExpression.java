@@ -76,7 +76,7 @@ public abstract class JavaLikePreparedStringExpression extends AbstractPreparedS
         StringBuilder fixedName = new StringBuilder();
         boolean fixed = false;
         if (! Character.isJavaIdentifierStart(varName.charAt(0))) {
-            fixedName.append(SPECIAL_CHAR_REPLACEMENT);
+            fixedName.insert(0, SPECIAL_CHAR_REPLACEMENT);
             fixed = true;
         }
         for (int i = 0; i < varName.length(); i++) {

@@ -8,6 +8,8 @@ Here are all the available views:
 
 * [Csv view](no.hal.wb.app.CsvView.md) - load and view csv data
 
+* [Table summery view](no.hal.wb.app.TableSummaryView.md) - summarize table data
+
 * [Bar chart view](no.hal.wb.app.BarChartView.md) - view table data as bar chart
 
 * [Stacked bar chart view](no.hal.wb.app.StackedBarChartView.md) - view table data as stacked bar chart

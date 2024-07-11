@@ -26,7 +26,7 @@ import tech.tablesaw.api.CategoricalColumn;
 import tech.tablesaw.api.Table;
 
 @Dependent
-public class SummaryViewController extends AbstractTableViewController implements BindingsTarget, BindingsSource {
+public class TableSummaryViewController extends AbstractTableViewController implements BindingsTarget, BindingsSource {
 
     @FXML
     CheckComboBox<String> summaryColumnsSelector;

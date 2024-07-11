@@ -13,7 +13,7 @@
         <padding>
             <Insets top="0" bottom="10" left="0" right="0"/>
         </padding>
-        <TextField fx:id="uriText" promptText="URL or path to local folder with csv" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="uriText" promptText="URL or path to local folder with csv" HBox.hgrow="ALWAYS" onAction="#loadCsv"/>
         <Button fx:id="loadCsvAction" text="Load csv" onAction="#loadCsv"/>
         <Pane minWidth="10"/>
         <Button text="File..." onAction="#browseCsvFile"/>

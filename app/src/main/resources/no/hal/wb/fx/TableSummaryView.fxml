@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.hal.wb.tables.SummaryViewController">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.hal.wb.tables.TableSummaryViewController">
     <HBox alignment="CENTER_LEFT" spacing="2">
         <padding>
             <Insets top="5" bottom="0" left="5" right="5"/>

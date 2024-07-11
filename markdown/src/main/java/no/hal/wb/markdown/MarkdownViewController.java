@@ -10,18 +10,22 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
 import org.jboss.logging.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.ValueNode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import javafx.application.HostServices;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -86,6 +90,7 @@ public class MarkdownViewController implements Configurable {
                 node.getProperties().put("markdown-link-description", description);
             }
         };
+        markdownView.setPadding(new Insets(5));
         
         markdownView.setOnMouseClicked(mouseEvent -> {
             if (! contextMenuOpener.apply(mouseEvent)) {
@@ -171,6 +176,15 @@ public class MarkdownViewController implements Configurable {
     private List<HistoryEntry> history;
     private int historyPosition = 0;
 
+    private <T> void setHistory(Iterator<T> entries, Function<T, URI> uriFunction) {
+        history = new ArrayList<>();
+        while (entries.hasNext()) {
+            history.add(new HistoryEntry(null, uriFunction.apply(entries.next())));
+        }
+        historyPosition = history.size() - 1;
+    }
+
+
     private void navigate(int delta) {
         int newPosition = historyPosition + delta;
         if (history == null || newPosition < 0 || newPosition >= history.size()) {
@@ -228,18 +242,27 @@ public class MarkdownViewController implements Configurable {
 
     @Override
     public JsonNode getConfiguration() {
-        return configuration(markdownResource.toString());
+        var configuration = (ObjectNode) configuration(markdownResource.toString());
+        var historyConfig = Configurable.getJsonNodeFactory().arrayNode(history.size());
+        for (var entry : history) {
+            historyConfig.add(entry.markdownResource.toString());
+        }
+        configuration.set("history", historyConfig);
+        return configuration;
     }
 
     @Override
     public void configure(JsonNode configuration) {
         if (configuration != null) {
-            markdownResource = switch (configuration.get("markdownResource")) {
-                case NullNode nullNode -> null;
-                case ValueNode valueNode -> URI.create(valueNode.asText());
-                default -> null;
-            };
+            if (configuration.get("markdownResource") instanceof ValueNode markdownResourceNode) {
+                markdownResource = URI.create(markdownResourceNode.asText());
+            }
+            if (configuration.get("history") instanceof ArrayNode historyNode) {
+                setHistory(historyNode.iterator(), entry -> URI.create(entry.asText()));
+                navigate(0);
+            } else {
+                updateView();
+            }
         }
-        updateView();
     }
 }

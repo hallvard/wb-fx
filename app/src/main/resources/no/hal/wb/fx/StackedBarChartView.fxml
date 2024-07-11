@@ -19,6 +19,8 @@
         <Label text="Main axis column: "/>
         <ComboBox fx:id="mainAxisColumnSelector" onAction="#updateChart"/>
         <Pane minWidth="10"/>
+        <Label text="Number column(s): "/>
+        <CheckComboBox fx:id="numberColumnsSelector"/>
     </HBox>
     <StackedBarChart fx:id="xyChart" VBox.vgrow="ALWAYS" animated="false">
         <xAxis>
